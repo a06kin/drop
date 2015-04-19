@@ -2,12 +2,12 @@ package me.aaa.drop.mainMenu;
 
 
 import com.badlogic.gdx.Screen;
-import me.aaa.drop.Drop;
+import me.aaa.drop.DropGame;
 
 public class MainMenu implements Screen {
 
 
-    public MainMenu(Drop drop) {
+    public MainMenu(DropGame drop) {
 
     }
 
