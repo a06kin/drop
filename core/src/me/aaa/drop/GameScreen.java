@@ -1,12 +1,6 @@
 package me.aaa.drop;
 
-import me.aaa.drop.mainMenu.MainMenu;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
@@ -17,9 +11,11 @@ public class GameScreen implements Screen, InputProcessor, GestureListener {
 	
 	public GameScreen(DropGame _game) {
 		this(null, _game);
+		Gdx.input.setCatchBackKey(true);
 	}
 	
 	public GameScreen(Screen prevScreen, DropGame _game) {
+		Gdx.input.setCatchBackKey(true);
 		game = _game;
 		previousScreen = prevScreen;
 		
@@ -123,7 +119,7 @@ public class GameScreen implements Screen, InputProcessor, GestureListener {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (keycode == Keys.BACK) {
+		if (keycode == Input.Keys.BACK) {
 			if (previousScreen == null)
 				Gdx.app.exit();
 			else
