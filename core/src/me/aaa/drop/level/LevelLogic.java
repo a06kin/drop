@@ -2,7 +2,7 @@ package me.aaa.drop.level;
 
 public class LevelLogic {
 	
-	public LevelLogic(LevelScreen screen, LevelData data) {
+	public LevelLogic(LevelData data) {
 		
 	}
 	
