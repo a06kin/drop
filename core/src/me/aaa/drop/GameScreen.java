@@ -19,17 +19,16 @@ public class GameScreen implements Screen, InputProcessor, GestureListener {
 		game = _game;
 		previousScreen = prevScreen;
 		
+		
+	}
+	
+	@Override
+	public void show() {
 		InputMultiplexer im = new InputMultiplexer();
         GestureDetector gd = new GestureDetector(this);
         im.addProcessor(gd);
         im.addProcessor(this);
         Gdx.input.setInputProcessor(im);
-	}
-	
-	@Override
-	public void show() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
