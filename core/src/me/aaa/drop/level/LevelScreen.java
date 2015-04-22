@@ -36,6 +36,8 @@ public class LevelScreen extends GameScreen implements Screen {
     float scale_x;
     float scale_y;
     
+    float borderWidth = 0.33333333f;
+    
 	
 	public LevelScreen(Screen prevScreen, DropGame game) {
 		super(prevScreen, game);
@@ -46,17 +48,17 @@ public class LevelScreen extends GameScreen implements Screen {
 		
         texCharacter = new Texture(Gdx.files.internal("character.png"));
         texTiles = new Texture[4];
-        texTiles[0] = new Texture(Gdx.files.internal("tile1.png"));
-        texTiles[1] = new Texture(Gdx.files.internal("tile2.png"));
-        texTiles[2] = new Texture(Gdx.files.internal("tile3.png"));
-        texTiles[3] = new Texture(Gdx.files.internal("tile4.png"));
+        texTiles[0] = new Texture(Gdx.files.internal("tile5.png"));
+        texTiles[1] = new Texture(Gdx.files.internal("tile6.png"));
+        texTiles[2] = new Texture(Gdx.files.internal("tile7.png"));
+        texTiles[3] = new Texture(Gdx.files.internal("tile8.png"));
         
         texWall = new Texture[5];
         
-        texWall[0] = new Texture(Gdx.files.internal("wallVertical.png")); //E
-        texWall[1] = new Texture(Gdx.files.internal("wallHorizontal.png")); //N
-        texWall[2] = new Texture(Gdx.files.internal("wallVertical.png")); //W
-        texWall[3] = new Texture(Gdx.files.internal("wallHorizontal.png")); //S
+        texWall[0] = new Texture(Gdx.files.internal("wallConnector.png")); //E
+        texWall[1] = new Texture(Gdx.files.internal("wallConnector.png")); //N
+        texWall[2] = new Texture(Gdx.files.internal("wallConnector.png")); //W
+        texWall[3] = new Texture(Gdx.files.internal("wallConnector.png")); //S
         texWall[4] = new Texture(Gdx.files.internal("wallConnector.png")); //Connector
         
         character = new Sprite(texCharacter);
@@ -102,7 +104,7 @@ public class LevelScreen extends GameScreen implements Screen {
         			batch.draw(texTiles[variation], off_x + i * scale_x, off_y + j * scale_y, scale_x, scale_y);
         	
         		if (type == 1) {
-        			float borderWidth = 0.2f;
+        			
         			
         			if (i < levelData.width - 1 && levelData.grid[i + 1][j] / 4 == 0)
         				batch.draw(texWall[0], off_x + (i  + 1 - borderWidth) * scale_x, off_y + (j + borderWidth) * scale_y, borderWidth * scale_x, ( 1 - 2 * borderWidth) * scale_y);
@@ -161,8 +163,8 @@ public class LevelScreen extends GameScreen implements Screen {
 		w = width;
         h = height;
         
-        scale_x = w / (levelData.width - 1.6f);
-        scale_y = h / (levelData.height - 1.6f);
+        scale_x = w / (levelData.width - 2 * (1 - borderWidth));
+        scale_y = h / (levelData.height - 2 * (1 - borderWidth));
         
         if (scale_x > scale_y)
         	scale_x = scale_y;

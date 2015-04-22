@@ -27,6 +27,99 @@ public class LevelLogic {
 			data.char_a = (float)(Math.atan2(vy, vx) *180 / Math.PI);
 		}
 		
+		int x1 = (int)(new_x - data.char_r);
+		int x2 = (int)(new_x + data.char_r);
+		int y1 = (int)(new_y - data.char_r);
+		int y2 = (int)(new_y + data.char_r);
+		
+		int cx = (int)new_x;
+		int cy = (int)new_y;
+		
+		
+		if (data.isWall(x1,cy)) {
+			new_x = x1 + 1 + data.char_r;
+		//	processed = true;
+		} else if (data.isWall(x2,cy)) {
+			new_x = x2 - data.char_r;
+		//	processed = true;
+		}
+		
+		if (data.isWall(cx,y1)) {
+			new_y = y1 + 1 + data.char_r;
+		//	processed = true;
+		} else if (data.isWall(cx,y2)) {
+			new_y = y2 - data.char_r;
+		//	processed = true;
+		}
+		
+		if (true) {//!processed) {
+			if (data.isWall(x2, y2)) {
+				float dx = new_x - x2;
+				float dy = new_y - y2;
+				
+				float d2 = (float)Math.sqrt(dx * dx + dy * dy);
+				if (d2 < data.char_r) {
+					new_x = x2 + dx * data.char_r / d2;
+					new_y = y2 + dy * data.char_r / d2;
+				}
+			}
+			if (data.isWall(x1, y2)) {
+				float dx = new_x - x1 - 1;
+				float dy = new_y - y2;
+				
+				float d2 = (float)Math.sqrt(dx * dx + dy * dy);
+				if (d2 < data.char_r) {
+					new_x = x1 + 1 + dx * data.char_r / d2;
+					new_y = y2 + dy * data.char_r / d2;
+				}
+			}
+			if (data.isWall(x2, y1)) {
+				float dx = new_x - x2;
+				float dy = new_y - y1 - 1;
+				
+				float d2 = (float)Math.sqrt(dx * dx + dy * dy);
+				if (d2 < data.char_r) {
+					new_x = x2 + dx * data.char_r / d2;
+					new_y = y1 + 1 + dy * data.char_r / d2;
+				}
+			}
+			if (data.isWall(x1, y1)) {
+				float dx = new_x - x1 - 1;
+				float dy = new_y - y1 - 1;
+				
+				float d2 = (float)Math.sqrt(dx * dx + dy * dy);
+				if (d2 < data.char_r) {
+					new_x = x1 + 1 + dx * data.char_r / d2;
+					new_y = y1 + 1 + dy * data.char_r / d2;
+				}
+			}
+		}
+		
+		
+		/*
+		if (x1 == x2) {
+			if (y2 > y1) {
+				if (data.isWall(x1,y1)) {
+					new_y = y1 + 1 + data.char_r;
+				} else if (data.isWall(x1,y2)) {
+					new_y = y2 - data.char_r;
+				}
+			}
+		} else {
+			if (y1 == y2) {
+				if (data.isWall(x1,y1)) {
+					new_x = x1 + 1 + data.char_r;
+				} else if (data.isWall(x2,y1)) {
+					new_x = x2 - data.char_r;
+				}
+			} else {
+				//TODO
+			}
+		}*/
+		
+		//if (x1 == x2)
+		
+		/*
 		if (vx > 0) {
 			if (data.grid[(int)(new_x + data.char_r)][(int)data.char_y] == 4) {
 				new_x = (int)(new_x+data.char_r) - data.char_r;
@@ -49,7 +142,9 @@ public class LevelLogic {
 				new_y = (int)(new_y - data.char_r) + data.char_r + 1;
 				//new_x = data.char_x + vx * (new_y - data.char_y) / vy;
 			}
-		}
+		}*/
+		
+		
 				
 		/*if (data.grid[(int)new_x][(int)data.char_y] == 4) {
 			new_x = Math.round(new_x);
