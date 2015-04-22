@@ -11,83 +11,81 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class LevelScreen extends GameScreen implements Screen {
-	private LevelLogic gameLogic;
+	private LevelLogic levelLogic;
 	private boolean paused = false;
 	
 	private SpriteBatch batch;
-    private Texture texture1;
-    private Texture texture2;
+    private Texture texCharacter;
+    private Texture[] texTiles;
+    private Texture[] texWall;
     
     private Sprite character;
     
     private int w;
     private int h;
-    private float x;
+    /*private float x;
     private float y;
     
     private float vx;
-    private float vy;
+    private float vy;*/
+    
+    LevelData levelData;
+    
+    float off_x;
+    float off_y;
+    float scale_x;
+    float scale_y;
     
 	
 	public LevelScreen(Screen prevScreen, DropGame game) {
 		super(prevScreen, game);
-		gameLogic = new LevelLogic(new LevelData());
+		levelData = new LevelData();
+		levelLogic = new LevelLogic(levelData);
 		
 		batch = new SpriteBatch();
-        texture1 = new Texture(Gdx.files.internal("character.png"));
-        texture2 = new Texture(Gdx.files.internal("tiles.jpg"));
+		
+        texCharacter = new Texture(Gdx.files.internal("character.png"));
+        texTiles = new Texture[4];
+        texTiles[0] = new Texture(Gdx.files.internal("tile1.png"));
+        texTiles[1] = new Texture(Gdx.files.internal("tile2.png"));
+        texTiles[2] = new Texture(Gdx.files.internal("tile3.png"));
+        texTiles[3] = new Texture(Gdx.files.internal("tile4.png"));
         
-        character = new Sprite(texture1);
+        texWall = new Texture[5];
         
-        w = Gdx.graphics.getWidth();
-        h = Gdx.graphics.getHeight();
+        texWall[0] = new Texture(Gdx.files.internal("wallVertical.png")); //E
+        texWall[1] = new Texture(Gdx.files.internal("wallHorizontal.png")); //N
+        texWall[2] = new Texture(Gdx.files.internal("wallVertical.png")); //W
+        texWall[3] = new Texture(Gdx.files.internal("wallHorizontal.png")); //S
+        texWall[4] = new Texture(Gdx.files.internal("wallConnector.png")); //Connector
         
-        character.setSize(h/8f, h/8f);
-        
-        x = w / 2f;
-        y = h / 2f;
-        
-        vx = x;
-        vy = y;
-        
-        
+        character = new Sprite(texCharacter);
 	}
 	
 	@Override
     public void dispose() {
         batch.dispose();
-        texture1.dispose();
-        texture2.dispose();
+        texCharacter.dispose();
+        for (int i = 0; i < 4; ++i) {
+        	texTiles[i].dispose();
+        	texWall[i].dispose();
+        	
+        }
+        texWall[4].dispose();
     }
 	
 	@Override
 	public void render(float delta) {
-		if (!paused) gameLogic.update(delta);
-		float dx = vx - x;
-		float dy = vy - y;
+		if (!paused) levelLogic.update(Math.min(delta,0.1f));
 		
-		float d = (float)Math.sqrt(dx*dx+dy*dy);
+		float sx = levelData.char_r * scale_x;
+		float sy = levelData.char_r * scale_y;
 		
-		if (d < 200*delta) {
-			x = vx;
-			y = vy;
-		} else {
-			x += dx*200*delta/d;
-			y += dy*200*delta/d;
-			
-			character.setOrigin(h/16f, h/16f);
-	        character.setPosition(0,0);
-	        
-			float angle = (float)(Math.atan2(dy, dx) *180 / Math.PI);
-			character.setRotation(angle);
-		}
-		
-		x = Math.max(Math.min(x, (w -h) / 2f +h-h/16f), (w -h) / 2f +h/16f);
-		y = Math.max(Math.min(y, h-h/16f), h/16f);
-		
-		
-		
-		character.setCenter(x, y);
+		character.setSize(sx * 2, sy * 2);
+		character.setOrigin(sx, sy);
+        character.setPosition(0, 0);
+        character.setRotation(levelData.char_a);
+		character.setCenter(off_x + levelData.char_x * scale_x, off_y + levelData.char_y * scale_y);
 		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -95,7 +93,50 @@ public class LevelScreen extends GameScreen implements Screen {
         
         
         batch.begin();
-        batch.draw(texture2, (w -h) / 2f, 0, h, h);
+        
+        for (int i = 0; i < levelData.width; ++i)
+        	for (int j = 0; j < levelData.height; ++j) {
+        		int type = levelData.grid[i][j] / 4;
+        		int variation = levelData.grid[i][j] % 4;
+        		if (type == 0)
+        			batch.draw(texTiles[variation], off_x + i * scale_x, off_y + j * scale_y, scale_x, scale_y);
+        	
+        		if (type == 1) {
+        			float borderWidth = 0.2f;
+        			
+        			if (i < levelData.width - 1 && levelData.grid[i + 1][j] / 4 == 0)
+        				batch.draw(texWall[0], off_x + (i  + 1 - borderWidth) * scale_x, off_y + (j + borderWidth) * scale_y, borderWidth * scale_x, ( 1 - 2 * borderWidth) * scale_y);
+        			
+        			if (j > 0 && levelData.grid[i][j - 1] / 4 == 0)
+        				batch.draw(texWall[1], off_x + (i + borderWidth) * scale_x, off_y + j * scale_y, (1 - borderWidth * 2) * scale_x, borderWidth * scale_y);
+        			
+        			if (i > 0 && levelData.grid[i - 1][j] / 4 == 0)
+        				batch.draw(texWall[2], off_x + i * scale_x, off_y + (j + borderWidth)  * scale_y, borderWidth * scale_x, (1 - 2 * borderWidth) * scale_y);
+        			
+        			if (j < levelData.height - 1 && levelData.grid[i][j + 1] / 4 == 0)
+        				batch.draw(texWall[3], off_x + (i + borderWidth) * scale_x, off_y + (j + 1 - borderWidth) * scale_y, (1 - 2* borderWidth) * scale_x, borderWidth * scale_y);
+        			
+        			if (i > 0 && j > 0)
+        				if (levelData.grid[i - 1][j] / 4 == 0 || levelData.grid[i][j - 1] / 4 == 0 || levelData.grid[i - 1][j - 1] / 4 == 0)
+        					batch.draw(texWall[4], off_x + i * scale_x, off_y + j * scale_y, borderWidth * scale_x, borderWidth * scale_y);
+        			
+        			if (i < levelData.width - 1 && j > 0)
+        				if (levelData.grid[i + 1][j] / 4 == 0 || levelData.grid[i][j - 1] / 4 == 0 || levelData.grid[i + 1][j - 1] / 4 == 0)
+        					batch.draw(texWall[4], off_x + (i + 1 - borderWidth) * scale_x, off_y + j * scale_y, borderWidth * scale_x, borderWidth * scale_y);
+        		
+        			if (i > 0 && j < levelData.height - 1)
+        				if (levelData.grid[i - 1][j] / 4 == 0 || levelData.grid[i][j + 1] / 4 == 0 || levelData.grid[i - 1][j + 1] / 4 == 0)
+        					batch.draw(texWall[4], off_x + i * scale_x, off_y + (j + 1 - borderWidth) * scale_y, borderWidth * scale_x, borderWidth * scale_y);
+        			
+        			if (i < levelData.width - 1 && j < levelData.height - 1)
+        				if (levelData.grid[i + 1][j] / 4 == 0 || levelData.grid[i][j + 1] / 4 == 0 || levelData.grid[i + 1][j + 1] / 4 == 0)
+        					batch.draw(texWall[4], off_x + (i + 1 - borderWidth) * scale_x, off_y + (j + 1 - borderWidth) * scale_y, borderWidth * scale_x, borderWidth * scale_y);
+        		}
+        	}
+        
+        //batch.draw(texture2, (w -h) / 2f, 0, h, h);
+        
+        
         
         character.draw(batch);
         //batch.draw(texture1, x - h / 16f, y - h / 16f, h / 8f, h / 8f);
@@ -106,24 +147,60 @@ public class LevelScreen extends GameScreen implements Screen {
 	}
 	
 	@Override
+	public void pause() {
+		paused = true;
+	}
+
+	@Override
+	public void resume() {
+		paused = false;
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		w = width;
+        h = height;
+        
+        scale_x = w / (levelData.width - 1.6f);
+        scale_y = h / (levelData.height - 1.6f);
+        
+        if (scale_x > scale_y)
+        	scale_x = scale_y;
+        else
+        	scale_y = scale_x;
+        
+        
+        off_x = (w - scale_x * levelData.width) / 2;
+        off_y = (h - scale_y * levelData.height) / 2;
+	}
+	
+	private void setTarget(float screenX, float screenY) {
+		screenY = h - screenY;
+		
+		levelData.target_x = (screenX - off_x ) / scale_x;
+		levelData.target_y = (screenY - off_y ) / scale_y;
+		
+		levelLogic.shouldUpdatePoisition = true;
+		
+		//levelData.target_x = 
+		
+	}
+	
+	@Override
 	public boolean touchDown(float screenX, float screenY, int pointer, int button) {
-		vx = screenX;
-		vy = h - screenY;
+		setTarget(screenX, screenY);
 		return false;
 	}
 	
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		vx = screenX;
-		vy = h - screenY;
-
+		setTarget(screenX, screenY);
 		return false;
 	}
 	
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		vx = x;
-		vy = y;
+		levelLogic.shouldUpdatePoisition = false;
 		return false;
 	}
 }
